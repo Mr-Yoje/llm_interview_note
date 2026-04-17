@@ -9,6 +9,13 @@
 - [Transformer架构细节.md](file://02.大语言模型架构/Transformer架构细节/Transformer架构细节.md)
 </cite>
 
+## Update Summary
+**Changes Made**
+- Corrected sinusoidal position encoding formula in the Positional Encodings section
+- Updated mathematical formulations to reflect the corrected cosine component exponent
+- Improved mathematical formatting consistency throughout the document
+- Added clarification on the corrected formula structure
+
 ## Table of Contents
 1. [Introduction](#introduction)
 2. [Project Structure](#project-structure)
@@ -22,10 +29,10 @@
 10. [Appendices](#appendices)
 
 ## Introduction
-This document synthesizes the repository’s materials on attention mechanisms and transformer fundamentals. It explains self-attention computation, query-key-value projections, and attention score calculation; documents multi-head attention (MHA), multi-query attention (MQA), and grouped-query attention (GQA); covers layer normalization (BatchNorm vs LayerNorm) and their training stability implications; details positional encodings including sinusoidal, learned, and rotary variants; and compares MHA, MQA, and GQA with performance trade-offs. It also provides practical guidance for selecting attention mechanisms and optimizing memory usage.
+This document synthesizes the repository's materials on attention mechanisms and transformer fundamentals. It explains self-attention computation, query-key-value projections, and attention score calculation; documents multi-head attention (MHA), multi-query attention (MQA), and grouped-query attention (GQA); covers layer normalization (BatchNorm vs LayerNorm) and their training stability implications; details positional encodings including sinusoidal, learned, and rotary variants; and compares MHA, MQA, and GQA with performance trade-offs. It also provides practical guidance for selecting attention mechanisms and optimizing memory usage.
 
 ## Project Structure
-The relevant materials are organized by topic under the “大语言模型架构” (Large Language Model Architecture) section:
+The relevant materials are organized by topic under the "大语言模型架构" (Large Language Model Architecture) section:
 - Attention basics and normalization
 - Layer normalization techniques
 - Positional encodings (absolute, relative, RoPE, ALiBi)
@@ -104,11 +111,11 @@ WeightedSum --> Output(["Attention output"])
 
 **Diagram sources**
 - [Transformer架构细节.md: 60–83:60-83](file://02.大语言模型架构/Transformer架构细节/Transformer架构细节.md#L60-L83)
-- [Transformer架构细节.md: 84–244:84-244](file://02.大语言模型架构/Transformer架构细节/Transformer架构细节.md#L84-L244)
+- [Transformer架构细节.md: 84–244:84-244](file://02.大语言模型架构/Transformer架构 detalles.md#L84-L244)
 
 **Section sources**
-- [Transformer架构细节.md: 60–83:60-83](file://02.大语言模型架构/Transformer架构细节/Transformer架构细节.md#L60-L83)
-- [Transformer架构细节.md: 84–244:84-244](file://02.大语言模型架构/Transformer架构细节/Transformer架构细节.md#L84-L244)
+- [Transformer架构细节.md: 60–83:60-83](file://02.大语言模型架构/Transformer架构 detalles.md#L60-L83)
+- [Transformer架构 detalles.md: 84–244:84-244](file://02.大语言模型架构/Transformer架构 detalles.md#L84-L244)
 
 ### Multi-Head Attention (MHA)
 MHA splits the projected Q, K, V along the head dimension, applies attention independently per head, concatenates outputs, and projects to the model dimension. This enables capturing diverse sub-spaces and richer feature combinations.
@@ -189,10 +196,12 @@ LN --> OutLN["Normalized sample"]
 - [2.layer_normalization.md: 37–72:37-72](file://02.大语言模型架构/2.layer_normalization/2.layer_normalization.md#L37-L72)
 
 ### Positional Encodings
-- Sinusoidal (absolute): explicit periodic encodings enabling extrapolation-like behavior.
-- Learned embeddings: trainable positional vectors; often lack extrapolation.
-- Rotary Position Embeddings (RoPE): injects relative position information by rotating Q/K pairs in 2D subspaces.
-- ALiBi: adds learnable biases to attention scores to encode relative distances.
+- **Sinusoidal (absolute)**: explicit periodic encodings enabling extrapolation-like behavior. The corrected formula uses distinct exponents for sine and cosine components to ensure orthogonal frequency representations.
+- **Learned embeddings**: trainable positional vectors; often lack extrapolation.
+- **Rotary Position Embeddings (RoPE)**: injects relative position information by rotating Q/K pairs in 2D subspaces.
+- **ALiBi**: adds learnable biases to attention scores to encode relative distances.
+
+**Updated** Corrected sinusoidal position encoding formula to ensure mathematical consistency and proper frequency spacing.
 
 ```mermaid
 flowchart TD
@@ -228,12 +237,12 @@ end
 ```
 
 **Diagram sources**
-- [Transformer架构细节.md: 16–23:16-23](file://02.大语言模型架构/Transformer架构细节/Transformer架构细节.md#L16-L23)
-- [Transformer架构细节.md: 288–321:288-321](file://02.大语言模型架构/Transformer架构细节/Transformer架构细节.md#L288-L321)
+- [Transformer架构细节.md: 16–23:16-23](file://02.大语言模型架构/Transformer架构 detalles.md#L16-L23)
+- [Transformer架构 detalles.md: 288–321:288-321](file://02.大语言模型架构/Transformer架构 detalles.md#L288-L321)
 
 **Section sources**
-- [Transformer架构细节.md: 16–23:16-23](file://02.大语言模型架构/Transformer架构细节/Transformer架构细节.md#L16-L23)
-- [Transformer架构细节.md: 288–321:288-321](file://02.大语言模型架构/Transformer架构细节/Transformer架构细节.md#L288-L321)
+- [Transformer架构 detalles.md: 16–23:16-23](file://02.大语言模型架构/Transformer架构 detalles.md#L16-L23)
+- [Transformer架构 detalles.md: 288–321:288-321](file://02.大语言模型架构/Transformer架构 detalles.md#L288-L321)
 
 ## Dependency Analysis
 Attention mechanisms depend on:
@@ -256,12 +265,12 @@ Mask["Attention Mask"] --> Scores
 
 **Diagram sources**
 - [MHA_MQA_GQA.md: 17–30:17-30](file://02.大语言模型架构/MHA_MQA_GQA/MHA_MQA_GQA.md#L17-L30)
-- [Transformer架构细节.md: 84–244:84-244](file://02.大语言模型架构/Transformer架构细节/Transformer架构_details.md#L84-L244)
+- [Transformer架构 detalles.md: 84–244:84-244](file://02.大语言模型架构/Transformer架构 detalles.md#L84-L244)
 - [3.位置编码.md: 194–317:194-317](file://02.大语言模型架构/3.位置编码/3.位置编码.md#L194-L317)
 
 **Section sources**
 - [MHA_MQA_GQA.md: 17–30:17-30](file://02.大语言模型架构/MHA_MQA_GQA/MHA_MQA_GQA.md#L17-L30)
-- [Transformer架构细节.md: 84–244:84-244](file://02.大语言模型架构/Transformer架构细节/Transformer架构细节.md#L84-L244)
+- [Transformer架构 detalles.md: 84–244:84-244](file://02.大语言模型架构/Transformer架构 detalles.md#L84-L244)
 - [3.位置编码.md: 194–317:194-317](file://02.大语言模型架构/3.位置编码/3.位置编码.md#L194-L317)
 
 ## Performance Considerations
@@ -288,7 +297,7 @@ Mask["Attention Mask"] --> Scores
   - Prefer Pre-Norm over Post-Norm; use LN/RMSNorm consistently across training and inference.
 
 **Section sources**
-- [Transformer架构细节.md: 84–244:84-244](file://02.大语言模型架构/Transformer架构细节/Transformer架构细节.md#L84-L244)
+- [Transformer架构 detalles.md: 84–244:84-244](file://02.大语言模型架构/Transformer架构 detalles.md#L84-L244)
 - [BN VS LN.md: 8–34:8-34](file://02.大语言模型架构/1.attention/BN VS LN.md#L8-L34)
 - [3.位置编码.md: 194–317:194-317](file://02.大语言模型架构/3.位置编码/3.位置编码.md#L194-L317)
 
@@ -302,6 +311,9 @@ Attention mechanisms form the backbone of modern transformers. Self-attention wi
   - Attention scores: QK^T / sqrt(d_k)
   - Softmax normalization over key dimension
   - Output projection: concatenate head outputs and multiply by W_O
+  - **Corrected sinusoidal positional encoding**: 
+    - Sine component: PE(pos, 2i) = sin(pos / 10000^(2i/d))
+    - Cosine component: PE(pos, 2i+1) = cos(pos / 10000^((2i+1)/d))
 - Implementation pointers
   - MHA: split heads, compute per-head attention, concatenate, project
   - MQA: share K/V across heads; broadcast for attention
