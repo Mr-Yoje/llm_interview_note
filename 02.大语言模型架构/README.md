@@ -36,6 +36,8 @@
 
 [chatglm系列模型](/02.大语言模型架构/chatglm系列模型/chatglm系列模型.md "chatglm系列模型")
 
+[qwen系列模型](/02.大语言模型架构/qwen系列模型/qwen系列模型.md "qwen系列模型")
+
 [llama 2代码详解](</02.大语言模型架构/llama 2代码详解/llama 2代码详解.md> "llama 2代码详解")
 
 [llama 3](</02.大语言模型架构/llama 3/llama 3.md> "llama 3")
