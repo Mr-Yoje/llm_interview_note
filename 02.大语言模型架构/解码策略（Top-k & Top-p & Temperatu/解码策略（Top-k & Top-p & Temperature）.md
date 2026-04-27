@@ -227,7 +227,7 @@ class TemperatureSampler(Sampler):
 
 ## 4.联合采样（top-k & top-p & Temperature）
 
-通常是将 **top-k、top-p、Temperature 联合起来使用**。使用的先后顺序是` top-k->top-p->Temperature`。
+通常是将 **top-k、top-p、Temperature 联合起来使用**。使用的先后顺序是 ` top-k->top-p->Temperature`。
 
 还是以前面的例子为例。
 
