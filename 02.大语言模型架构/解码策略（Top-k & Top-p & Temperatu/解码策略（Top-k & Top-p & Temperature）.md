@@ -225,6 +225,51 @@ class TemperatureSampler(Sampler):
         return dist.sample()
 ```
 
+
+
+---
+
+## Parallel Sampling vs Beam Search
+
+**Q**: parallel sampling, beam search
+
+**A**:
+
+### Beam Search（束搜索）
+
+每步保留得分最高的 beam_size 个候选序列，最终返回得分最高的序列。
+
+- **目标**：找到概率最大的序列
+- **输出**：1 个最优序列
+- **确定性**：同一输入输出固定不变
+- **多样性**：低，倾向高概率但可能枯燥的文本
+- **适用场景**：机器翻译、摘要、代码生成
+
+### Parallel Sampling（并行采样）
+
+从同一个 prompt 独立采样多个序列，每个序列的生成互不影响。
+
+- **目标**：生成多个不同的候选序列
+- **输出**：n 个序列（全部返回）
+- **确定性**：有随机性（涉及采样）
+- **多样性**：高，每个序列独立采样
+- **适用场景**：创意写作、对话系统、多候选选择
+
+### 核心区别
+
+| 维度 | Beam Search | Parallel Sampling |
+|------|-------------|-------------------|
+| 候选关系 | 互相竞争，共享前缀 | 完全独立 |
+| 每步选择 | 从所有 beam 扩展中选 top-beam_size | 每个序列独立采样 |
+| 输出 | 1 个最优 | n 个不同的 |
+| KV Cache 共享 | 所有 beam 共享 prompt 的 KV Cache | 所有序列共享 prompt 的 KV Cache |
+
+### PagedAttention 中的内存共享
+
+两者都从同一 prompt 生成多个序列，因此都能利用 PagedAttention 的 copy-on-write 机制共享 Prompt KV Cache，避免重复存储。
+
+*归档时间: 2026-02-26*
+
 ## 4.联合采样（top-k & top-p & Temperature）
 
 通常是将 **top-k、top-p、Temperature 联合起来使用**。使用的先后顺序是 ` top-k->top-p->Temperature`。

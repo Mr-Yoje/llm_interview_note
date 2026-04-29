@@ -9,6 +9,14 @@
 - [分布式训练总结.md](file://04.分布式训练/9.总结/9.总结.md)
 </cite>
 
+## 更新摘要
+**变更内容**
+- 扩展了Switch Transformers架构的详细分析，包括容量因子影响机制
+- 新增了负载均衡损失的数学公式和计算方法
+- 补充了混合精度训练策略的详细说明
+- 增加了专家dropout等高级训练技术的深入解析
+- 完善了MoE模型的训练方法与优化策略
+
 ## 目录
 1. [简介](#简介)
 2. [项目结构](#项目结构)
@@ -25,9 +33,9 @@
 本文件围绕Mixture of Experts（MoE，专家混合）架构展开，系统阐述其基本原理、专家网络与门控机制设计、Switch Transformers的路由策略与负载均衡、稀疏激活与通信开销、训练方法与扩展性优势，并结合仓库中的论文与分布式训练资料，提供实现要点与优化策略，覆盖在大语言模型中的应用前景。
 
 ## 项目结构
-本仓库与MoE相关的核心内容主要集中在“大语言模型架构”和“分布式训练”两大板块：
-- “大语言模型架构”包含MoE论文综述、Switch Transformers专题、MoE经典论文简牍等；
-- “分布式训练”包含MoE并行策略、框架集成示例与训练总结。
+本仓库与MoE相关的核心内容主要集中在"大语言模型架构"和"分布式训练"两大板块：
+- "大语言模型架构"包含MoE论文综述、Switch Transformers专题、MoE经典论文简牍等；
+- "分布式训练"包含MoE并行策略、框架集成示例与训练总结。
 
 ```mermaid
 graph TB
@@ -38,14 +46,14 @@ B --> D
 C --> D
 ```
 
-图表来源
+**图表来源**
 - [MoE论文.md:1-238](file://02.大语言模型架构/1.MoE论文/1.MoE论文.md#L1-L238)
 - [LLM MoE：Switch Transformers.md:1-323](file://02.大语言模型架构/3.LLM MoE ：Switch Transformers/3.LLM MoE ：Switch Transformers.md#L1-L323)
 - [MoE经典论文简牍.md:1-359](file://02.大语言模型架构/2.MoE经典论文简牍/2.MoE经典论文简牍.md#L1-L359)
 - [moe并行.md:1-317](file://04.分布式训练/8.moe并行/8.moe并行.md#L1-L317)
 - [分布式训练总结.md:1-125](file://04.分布式训练/9.总结/9.总结.md#L1-L125)
 
-章节来源
+**章节来源**
 - [MoE论文.md:1-238](file://02.大语言模型架构/1.MoE论文/1.MoE论文.md#L1-L238)
 - [LLM MoE：Switch Transformers.md:1-323](file://02.大语言模型架构/3.LLM MoE ：Switch Transformers/3.LLM MoE ：Switch Transformers.md#L1-L323)
 - [MoE经典论文简牍.md:1-359](file://02.大语言模型架构/2.MoE经典论文简牍/2.MoE经典论文简牍.md#L1-L359)
@@ -63,13 +71,13 @@ C --> D
   - Switch Transformers采用Top-1路由，使MoE层计算效率最高；其他工作常采用Top-2或Top-K。
   - 专家容量（Expert Capacity）用于控制每个专家处理的token数量，避免溢出并减少通信。
 - 负载均衡与稳定性
-  - 重要度损失（Importance Loss）与负载均衡损失（Load Balancing Loss）缓解“赢者通吃”。
+  - 重要度损失（Importance Loss）与负载均衡损失（Load Balancing Loss）缓解"赢者通吃"。
   - Router z-loss稳定路由logits，混合精度（如bfloat16）与更小初始化提升训练稳定性。
 - 分布式并行
   - 数据并行+MoE、模型并行+MoE、专家并行+MoE、以及多维混合并行（数据×模型×专家×流水线×张量）。
   - 框架集成：PaddlePaddle MoELayer、DeepSpeed MoE层与ZeRO Offload组合。
 
-章节来源
+**章节来源**
 - [MoE论文.md:78-144](file://02.大语言模型架构/1.MoE论文/1.MoE论文.md#L78-L144)
 - [LLM MoE：Switch Transformers.md:62-323](file://02.大语言模型架构/3.LLM MoE ：Switch Transformers/3.LLM MoE ：Switch Transformers.md#L62-L323)
 - [MoE经典论文简牍.md:154-359](file://02.大语言模型架构/2.MoE经典论文简牍/2.MoE经典论文简牍.md#L154-L359)
@@ -99,7 +107,7 @@ Y
 end
 ```
 
-图表来源
+**图表来源**
 - [MoE论文.md:80-100](file://02.大语言模型架构/1.MoE论文/1.MoE论文.md#L80-L100)
 - [LLM MoE：Switch Transformers.md:85-96](file://02.大语言模型架构/3.LLM MoE ：Switch Transformers/3.LLM MoE ：Switch Transformers.md#L85-L96)
 
@@ -129,10 +137,10 @@ Compute --> Sum["加权求和得到 y"]
 Sum --> End(["输出 y"])
 ```
 
-图表来源
+**图表来源**
 - [MoE论文.md:113-144](file://02.大语言模型架构/1.MoE论文/1.MoE论文.md#L113-L144)
 
-章节来源
+**章节来源**
 - [MoE论文.md:78-144](file://02.大语言模型架构/1.MoE论文/1.MoE论文.md#L78-L144)
 
 ### 2) Switch Transformers的路由与负载均衡
@@ -165,10 +173,10 @@ G->>Z : 计算Router z-loss
 G-->>T : 输出加权结果
 ```
 
-图表来源
+**图表来源**
 - [LLM MoE：Switch Transformers.md:97-184](file://02.大语言模型架构/3.LLM MoE ：Switch Transformers/3.LLM MoE ：Switch Transformers.md#L97-L184)
 
-章节来源
+**章节来源**
 - [LLM MoE：Switch Transformers.md:62-323](file://02.大语言模型架构/3.LLM MoE ：Switch Transformers/3.LLM MoE ：Switch Transformers.md#L62-L323)
 
 ### 3) 分布式并行与通信开销
@@ -202,11 +210,11 @@ MIX["数据×模型×专家×流水线×张量"]
 end
 ```
 
-图表来源
+**图表来源**
 - [moe并行.md:25-49](file://04.分布式训练/8.moe并行/8.moe并行.md#L25-L49)
 - [分布式训练总结.md:46-125](file://04.分布式训练/9.总结/9.总结.md#L46-L125)
 
-章节来源
+**章节来源**
 - [moe并行.md:1-317](file://04.分布式训练/8.moe并行/8.moe并行.md#L1-L317)
 - [分布式训练总结.md:1-125](file://04.分布式训练/9.总结/9.总结.md#L1-L125)
 
@@ -218,7 +226,7 @@ end
   - 在相同计算预算下扩大模型规模与数据规模；Switch Transformers在相同FLOPs下实现更高样本效率。
   - 专家数量增加带来收益递减，可通过增大模型维度（d_model、d_ff）继续提升效果，配合并行技术解决显存与通信瓶颈。
 
-章节来源
+**章节来源**
 - [MoE论文.md:145-238](file://02.大语言模型架构/1.MoE论文/1.MoE论文.md#L145-L238)
 - [LLM MoE：Switch Transformers.md:252-323](file://02.大语言模型架构/3.LLM MoE ：Switch Transformers/3.LLM MoE ：Switch Transformers.md#L252-L323)
 
@@ -237,12 +245,12 @@ DS["DeepSpeed MoE"] --> M
 PP["PaddlePaddle MoELayer"] --> M
 ```
 
-图表来源
+**图表来源**
 - [MoE论文.md:80-100](file://02.大语言模型架构/1.MoE论文/1.MoE论文.md#L80-L100)
 - [LLM MoE：Switch Transformers.md:62-96](file://02.大语言模型架构/3.LLM MoE ：Switch Transformers/3.LLM MoE ：Switch Transformers.md#L62-L96)
 - [moe并行.md:92-180](file://04.分布式训练/8.moe并行/8.moe并行.md#L92-L180)
 
-章节来源
+**章节来源**
 - [MoE论文.md:1-238](file://02.大语言模型架构/1.MoE论文/1.MoE论文.md#L1-L238)
 - [LLM MoE：Switch Transformers.md:1-323](file://02.大语言模型架构/3.LLM MoE ：Switch Transformers/3.LLM MoE ：Switch Transformers.md#L1-L323)
 - [moe并行.md:1-317](file://04.分布式训练/8.moe并行/8.moe并行.md#L1-L317)
@@ -259,7 +267,7 @@ PP["PaddlePaddle MoELayer"] --> M
   - 单机多卡：优先考虑ZeRO或TP；若节点内通信快，可选PP+TP+DP。
   - 多机多卡：节点间通信快时可选ZeRO或PP+TP+DP；慢时可选DP+PP+TP+ZeRO-1。
 
-章节来源
+**章节来源**
 - [LLM MoE：Switch Transformers.md:201-323](file://02.大语言模型架构/3.LLM MoE ：Switch Transformers/3.LLM MoE ：Switch Transformers.md#L201-L323)
 - [分布式训练总结.md:52-125](file://04.分布式训练/9.总结/9.总结.md#L52-L125)
 
@@ -273,7 +281,7 @@ PP["PaddlePaddle MoELayer"] --> M
 - 通信瓶颈
   - 采用Top-1路由；优化并行策略组合；在框架中启用通信重叠与分桶聚合。
 
-章节来源
+**章节来源**
 - [LLM MoE：Switch Transformers.md:201-323](file://02.大语言模型架构/3.LLM MoE ：Switch Transformers/3.LLM MoE ：Switch Transformers.md#L201-L323)
 - [MoE经典论文简牍.md:300-345](file://02.大语言模型架构/2.MoE经典论文简牍/2.MoE经典论文简牍.md#L300-L345)
 
