@@ -48,7 +48,7 @@ $$
 在第一部分介绍了通用强化学习的流程，那么要怎么把这个流程对应到NLP任务中呢？**换句话说，NLP任务中的智能体、环境、状态、动作等等，都是指什么呢？**
 
 ![](image/image__amAsvnuon.png)
-
+djF8MTlkYmU1NDNiNGIwMTYyY2ZkMDF8NDkzMDYxNTQ1MTA1MXw74ByNbf7fhw1yQetP0q4pV4hYAwD3iN2ESvoj9PfRkHw=
 回想一下对NLP任务做强化学习（RLHF）的目的：**希望给模型一个prompt，让模型能生成符合人类喜好的response**。再回想一下GPT模型做推理的过程：**每个时刻** `t` **只产生一个token，即token是一个一个蹦出来的，先有上一个token，再有下一个token**\*\*。\*\*&#x20;
 
 复习了这两点，现在可以更好解读上面这张图了：
