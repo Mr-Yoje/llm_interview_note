@@ -270,6 +270,43 @@ class TemperatureSampler(Sampler):
 
 *归档时间: 2026-02-26*
 
+
+
+---
+
+## Logits 采样生成新 Token 的完整过程
+
+**Q**: 最后一个位置的 logits 采样怎么生成新的token
+
+**A**:
+
+从 Transformer 输出的 logits 到最终生成新 token 的完整流程：
+
+```
+h_last [d_model] → lm_head投影 → logits [vocab_size]
+  → /T (Temperature缩放)
+  → Top-k过滤（保留前k个，其余-inf）
+  → Top-p过滤（保留累积概率>=p的最小集合）
+  → Softmax（转概率分布）
+  → multinomial采样 → token_id → decode → 新token
+```
+
+### 关键步骤
+
+1. **lm_head 投影**：`logits = h_last @ W_lm_head`，W_lm_head 通常与 Embedding 共享（转置）
+2. **Temperature 缩放**：`logits /= T`，T→0 确定性，T>1 更随机
+3. **Top-k**：保留概率最高的 k 个 token，其余设 -inf（k=1 等价 Greedy）
+4. **Top-p**：按概率降序排列，保留累积概率达到 p 的最小集合
+5. **Softmax**：归一化为合法概率分布
+6. **采样**：`token_id = multinomial(probs)`，按概率随机抽取（随机性来源）
+
+### Greedy vs 采样的区别
+
+- Greedy（T=0）：每步 argmax 选最高概率，确定但易陷入重复循环
+- 采样（T>0, Top-k/p）：按概率分布随机抽取，多样但可能不稳定
+
+*归档时间: 2026-02-26*
+
 ## 4.联合采样（top-k & top-p & Temperature）
 
 通常是将 **top-k、top-p、Temperature 联合起来使用**。使用的先后顺序是 ` top-k->top-p->Temperature`。

@@ -12,6 +12,8 @@
 
 [DPO](/07.强化学习/DPO/DPO.md "DPO")
 
+[GRPO](/07.强化学习/GRPO/GRPO.md "GRPO")
+
 ### 7.3 一些题目
 
 [1.rlhf相关](/07.强化学习/1.rlhf相关/1.rlhf相关.md "1.rlhf相关")
