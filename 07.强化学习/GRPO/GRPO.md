@@ -30,22 +30,28 @@ PPO 在 LLM 对齐中面临以下问题：
 
 ### 2.1 完整目标函数
 
-$$J_{GRPO}(\theta) = \mathbb{E}_{q \sim P(Q), \{o_i\}_{i=1}^G \sim \pi_{\theta_{old}}(\cdot|q)} \left[ \frac{1}{G} \sum_{i=1}^G \min\left(\frac{\pi_\theta(o_i|q)}{\pi_{old}(o_i|q)} A_i, \text{clip}\left(\frac{\pi_\theta(o_i|q)}{\pi_{old}(o_i|q)}, 1-\varepsilon, 1+\varepsilon\right) A_i\right) - \beta \mathbb{D}_{KL}(\pi_\theta \| \pi_{ref}) \right]$$
+$$
+J_{GRPO}(\theta) = \mathbb{E}_{q \sim P(Q), \{o_i\}_{i=1}^G \sim \pi_{\theta_{old}}(\cdot|q)} \left[ \frac{1}{G} \sum_{i=1}^G \min\left(\frac{\pi_\theta(o_i|q)}{\pi_{old}(o_i|q)} A_i, \text{clip}\left(\frac{\pi_\theta(o_i|q)}{\pi_{old}(o_i|q)}, 1-\varepsilon, 1+\varepsilon\right) A_i\right) - \beta \mathbb{D}_{KL}(\pi_\theta \| \pi_{ref}) \right]
+$$
 
 ### 2.2 逐步拆解
 
-目标函数由三部分组成：
+目标函数由三部分组成： 
 
 #### (1) 期望值计算
 
-$$\mathbb{E}_{q \sim P(Q), \{o_i\}_{i=1}^G \sim \pi_{\theta_{old}}(\cdot|q)}$$
+$$
+\mathbb{E}_{q \sim P(Q), \{o_i\}_{i=1}^G \sim \pi_{\theta_{old}}(\cdot|q)}
+$$
 
 - 从训练数据分布 $P(Q)$ 中采样查询 $q$
 - 对每个查询，从旧策略 $\pi_{\theta_{old}}$ 采样 $G$ 个候选响应 $\{o_1, o_2, ..., o_G\}$
 
 #### (2) 裁剪目标（Clipped Objective）
 
-$$\frac{1}{G} \sum_{i=1}^G \min\left(\frac{\pi_\theta(o_i|q)}{\pi_{old}(o_i|q)} A_i, \text{clip}\left(\frac{\pi_\theta(o_i|q)}{\pi_{old}(o_i|q)}, 1-\varepsilon, 1+\varepsilon\right) A_i\right)$$
+$$
+\frac{1}{G} \sum_{i=1}^G \min\left(\frac{\pi_\theta(o_i|q)}{\pi_{old}(o_i|q)} A_i, \text{clip}\left(\frac{\pi_\theta(o_i|q)}{\pi_{old}(o_i|q)}, 1-\varepsilon, 1+\varepsilon\right) A_i\right)
+$$
 
 - **策略比值**：$r_i = \frac{\pi_\theta(o_i|q)}{\pi_{old}(o_i|q)}$，衡量新旧策略的变化幅度
 - **裁剪机制**：源自 PPO，限制策略比值在 $[1-\varepsilon, 1+\varepsilon]$ 之间，防止策略更新过大导致不稳定
@@ -53,7 +59,9 @@ $$\frac{1}{G} \sum_{i=1}^G \min\left(\frac{\pi_\theta(o_i|q)}{\pi_{old}(o_i|q)} 
 
 #### (3) KL 散度正则项
 
-$$\beta \mathbb{D}_{KL}(\pi_\theta \| \pi_{ref})$$
+$$
+\beta \mathbb{D}_{KL}(\pi_\theta \| \pi_{ref})
+$$
 
 - 确保新策略不会偏离参考策略太远
 - $\beta$ 控制 KL 正则项的影响力度
@@ -62,9 +70,12 @@ $$\beta \mathbb{D}_{KL}(\pi_\theta \| \pi_{ref})$$
 
 这是 GRPO 与 PPO 的**最大区别**：
 
-$$\tilde{A}_i = \frac{r_i - \text{mean}(r_1, ..., r_G)}{\text{std}(r_1, ..., r_G)}$$
+$$
+\tilde{A}_i = \frac{r_i - \text{mean}(r_1, ..., r_G)}{\text{std}(r_1, ..., r_G)}
+$$
 
 其中：
+
 - $r_i$：对第 $i$ 个响应计算的奖励
 - $\text{mean}(r_1, ..., r_G)$：该组响应的平均奖励
 - $\text{std}(r_1, ..., r_G)$：该组奖励的标准差
@@ -151,36 +162,36 @@ Step 7: 梯度下降更新参数
 
 ### 4.1 模型需求对比
 
-| 组件 | PPO | GRPO |
-|------|-----|------|
-| 策略模型（Actor） | ✅ 需要训练 | ✅ 需要训练 |
-| 价值模型（Critic） | ✅ 需要训练 | ❌ **不需要** |
-| 奖励模型（Reward） | ✅ 需要推理 | ✅ 需要推理（或规则奖励） |
-| 参考模型（Reference） | ✅ 冻结 | ✅ 冻结 |
-| **模型总数** | **4 个** | **2-3 个** |
-| **显存需求** | 高 | **显著降低** |
+| 组件                  | PPO            | GRPO                      |
+| --------------------- | -------------- | ------------------------- |
+| 策略模型（Actor）     | ✅ 需要训练    | ✅ 需要训练               |
+| 价值模型（Critic）    | ✅ 需要训练    | ❌**不需要**        |
+| 奖励模型（Reward）    | ✅ 需要推理    | ✅ 需要推理（或规则奖励） |
+| 参考模型（Reference） | ✅ 冻结        | ✅ 冻结                   |
+| **模型总数**    | **4 个** | **2-3 个**          |
+| **显存需求**    | 高             | **显著降低**        |
 
 ### 4.2 优势计算对比
 
-| | PPO | GRPO |
-|--|-----|------|
-| 优势来源 | Critic 模型估计 V(s)，GAE 计算 | 组内奖励归一化 |
-| 优势公式 | $A_t = \sum_{l=0}^{\infty}(\gamma\lambda)^l \delta_{t+l}$ | $\tilde{A}_i = (r_i - \text{mean}) / \text{std}$ |
-| 依赖额外模型 | 是（Critic） | 否 |
-| 计算复杂度 | 高（需训练 Critic） | 低（只需统计归一化） |
+|              | PPO                                                         | GRPO                                               |
+| ------------ | ----------------------------------------------------------- | -------------------------------------------------- |
+| 优势来源     | Critic 模型估计 V(s)，GAE 计算                              | 组内奖励归一化                                     |
+| 优势公式 | A<sub>t</sub> = Σ(γλ)<sup>l</sup> δ<sub>t+l</sub> | Ã<sub>i</sub> = (r<sub>i</sub> - mean) / std |
+| 依赖额外模型 | 是（Critic）                                                | 否                                                 |
+| 计算复杂度   | 高（需训练 Critic）                                         | 低（只需统计归一化）                               |
 
 ### 4.3 整体对比
 
-| 维度 | PPO | GRPO |
-|------|-----|------|
-| 核心思想 | 绝对优势估计 + clip 约束 | 组内相对优势 + clip 约束 |
-| 奖励信号 | 绝对奖励分数 | 组内相对排名 |
-| 采样方式 | 每轮 1 个响应 per prompt | 每轮 G 个响应 per prompt |
-| 价值模型 | 必须 | 不需要 |
-| 实现复杂度 | 高 | 低 |
-| 显存消耗 | 高（4模型） | 低（2-3模型） |
-| 适用场景 | 通用对齐 | 推理任务（规则奖励） |
-| 代表应用 | InstructGPT, ChatGPT | DeepSeek-R1, DeepSeekMath |
+| 维度       | PPO                      | GRPO                      |
+| ---------- | ------------------------ | ------------------------- |
+| 核心思想   | 绝对优势估计 + clip 约束 | 组内相对优势 + clip 约束  |
+| 奖励信号   | 绝对奖励分数             | 组内相对排名              |
+| 采样方式   | 每轮 1 个响应 per prompt | 每轮 G 个响应 per prompt  |
+| 价值模型   | 必须                     | 不需要                    |
+| 实现复杂度 | 高                       | 低                        |
+| 显存消耗   | 高（4模型）              | 低（2-3模型）             |
+| 适用场景   | 通用对齐                 | 推理任务（规则奖励）      |
+| 代表应用   | InstructGPT, ChatGPT     | DeepSeek-R1, DeepSeekMath |
 
 ## 5. GRPO 的奖励函数设计
 
@@ -221,17 +232,23 @@ GRPO 中 KL 散度的计算方式与 PPO 不同：
 
 在 loss 中作为独立惩罚项加入：
 
-$$L_{PPO} = L_{actor} + c_1 L_{critic} + c_2 L_{KL}$$
+$$
+L_{PPO} = L_{actor} + c_1 L_{critic} + c_2 L_{KL}
+$$
 
 ### GRPO 的 KL 散度
 
 直接在目标函数中作为正则项：
 
-$$J_{GRPO} = \text{clip\_objective} - \beta \mathbb{D}_{KL}(\pi_\theta \| \pi_{ref})$$
+$$
+J_{GRPO} = \text{clip\_objective} - \beta \mathbb{D}_{KL}(\pi_\theta \| \pi_{ref})
+$$
 
 KL 散度的具体计算（逐 token 近似）：
 
-$$\mathbb{D}_{KL}(\pi_\theta \| \pi_{ref}) = \frac{\pi_{ref}(o_i|q)}{\pi_\theta(o_i|q)} - \log \frac{\pi_{ref}(o_i|q)}{\pi_\theta(o_i|q)} - 1$$
+$$
+\mathbb{D}_{KL}(\pi_\theta \| \pi_{ref}) = \frac{\pi_{ref}(o_i|q)}{\pi_\theta(o_i|q)} - \log \frac{\pi_{ref}(o_i|q)}{\pi_\theta(o_i|q)} - 1
+$$
 
 这种近似确保 KL 项可微，且计算高效（只需前向传播，不需要采样）。
 
@@ -308,6 +325,7 @@ PPO (2020)                    DPO (2023)                    GRPO (2024)
 ### Q2: GRPO 的组内相对优势为什么要除以标准差？
 
 除以标准差是一种归一化操作，有两个好处：
+
 1. **消除奖励尺度影响**：不同任务/问题的奖励绝对值可能差异很大，归一化后优势值在同一量级
 2. **稳定训练**：避免奖励值过大导致梯度爆炸或过小导致学习缓慢
 
